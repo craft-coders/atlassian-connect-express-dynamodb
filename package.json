@@ -1,0 +1,35 @@
+{
+  "name": "atlassian-connect-express-dynamodb",
+  "version": "1.0.0",
+  "description": "Dynamodb bindings for atlassian-connect-express",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/gellweiler/atlassian-connect-express-dynamodb.git"
+  },
+  "author": "Sebastian Gellweiler",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gellweiler/atlassian-connect-express-dynamodb/issues"
+  },
+  "homepage": "https://github.com/gellweiler/atlassian-connect-express-dynamodb#readme",
+  "dependencies": {
+    "atlassian-connect-express": "^3.2.0",
+    "aws-sdk": "^2.373.0",
+    "lodash": "^4.17.11",
+    "rsvp": "^4.8.4"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "sinon": "^7.1.1",
+    "proxyquire": "^2.1.0",
+    "chai": "^4.2.0"
+  }
+}
