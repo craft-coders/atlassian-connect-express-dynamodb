@@ -51,7 +51,12 @@ To use this library in your atlassian cloud application:
         [...]
         "store": {
             "adapter": "dynamodb",
-            "table": "tenants"
+            "table": "tenants",
+
+            // optional options
+            "connectionTimeout": 2500, // milliseconds
+            "timeout": 2500 // milliseconds
+            "maxRetries": 4
         },
         [...]
     ```
