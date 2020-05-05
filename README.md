@@ -16,10 +16,8 @@ To use this library in your atlassian cloud application:
     Properties:
       TableName: tenants
       KeySchema:
-        - AttributeName: clientKey
-          KeyType: HASH
         - AttributeName: key
-          KeyType: RANGE
+          KeyType: HASH
       AttributeDefinitions:
         - AttributeName: clientKey
           AttributeType: S
