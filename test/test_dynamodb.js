@@ -1,208 +1,130 @@
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var proxyquire =  require('proxyquire');
-var RSVP = require('rsvp');
+const expect = require('chai').expect;
+const sinon = require('sinon');
+const proxyquire =  require('proxyquire');
+const RSVP = require('rsvp');
+const { v4: uuidv4 } = require('uuid');
+const dynamodb = require('../lib/dynamodb');
+const AWS = require("aws-sdk");
 
-describe('DynamodbAdapter', function() {
-    describe('set()', function() {
-        it('sample entry', async function() {
-            var clientKey = "12345678-1234-1234-1234-0123456789AB";
-            var key = "clientInfo";
-            var value = {
-                "key": "my-add-on",
-                "clientKey": "12345678-1234-1234-1234-0123456789AB",
-                "publicKey": "123",
-                "sharedSecret": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-                "serverVersion": "6452",
-                "pluginsVersion": "1.245.0",
-                "baseUrl": "https://example.atlassian.net/wiki",
-                "productType": "confluence",
-                "description": "Atlassian Confluence at null ",
-                "eventType": "installed"
-            };
+const tenant_table = "atlassian-connect-express-dynamodb-test-tenant-table";
 
-            var docClient = function() {};
-            var dynamodb = proxyquire('../lib/dynamodb', {'aws-sdk': {DynamoDB: {DocumentClient: docClient}}});
+AWS.config.update({region: 'eu-west-1'});
 
-            docClient.prototype.put = function(params, callback) {
-                expect(params).to.deep.equal({
-                    "TableName": "tenants",
-                    "Item": {
-                        "clientKey": "12345678-1234-1234-1234-0123456789AB",
-                        "key": "clientInfo",
-                        "val": value
-                    }
-                });
-                callback(null);
-            };
+describe('Integration Test', function() {
+    var adapter;
 
-            var logger = {};
-            var options = {"table": "tenants"};
+    before(async function() {
+        // Create sample data
+        var docClient = new AWS.DynamoDB.DocumentClient();
 
-            var adapter = dynamodb(logger, options);
+        await docClient.put({
+          "TableName": tenant_table,
+          "Item": {
+            "key": "clientInfo",
+            "clientKey": "40b74094-18e8-417a-85bc-0b2c66eedad5",
+            "val": {"abc":123}
+          }
+        }).promise()
 
+        await docClient.put({
+          "TableName": tenant_table,
+          "Item": {
+            "key": "clientInfo",
+            "clientKey": "2921425a-abae-4969-82a5-7d03ce09a624",
+            "val": {"def":456}
+          }
+        }).promise()
+
+        var logger = {};
+        var options = {"table": tenant_table};
+        adapter = dynamodb(logger, options);
+    });
+
+    describe('save, retrieve and delete entry', function() {
+        var clientKey = uuidv4();
+
+        const value = {
+            "key": "my-add-on",
+            "clientKey": clientKey,
+            "publicKey": "123",
+            "sharedSecret": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "serverVersion": "6452",
+            "pluginsVersion": "1.245.0",
+            "baseUrl": "https://example.atlassian.net/wiki",
+            "productType": "confluence",
+            "description": "Atlassian Confluence at null ",
+            "eventType": "installed"
+        };
+
+        const key = "clientInfo";
+
+        it('create entry', async function() {
             var result = await adapter.set(key, value, clientKey);
             expect(result).to.equal(value);
         }).timeout(10000);
-    });
 
-    describe('get()', function() {
-        it('existing property', async function() {
-            var clientKey = "12345678-1234-1234-1234-0123456789AB";
-            var key = "clientInfo";
-            var value = {
-                "key": "my-add-on",
-                "clientKey": "12345678-1234-1234-1234-0123456789AB",
-                "publicKey": "123",
-                "sharedSecret": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-                "serverVersion": "6452",
-                "pluginsVersion": "1.245.0",
-                "baseUrl": "https://example.atlassian.net/wiki",
-                "productType": "confluence",
-                "description": "Atlassian Confluence at null ",
-                "eventType": "installed"
-            };
-
-            var docClient = function() {};
-            var dynamodb = proxyquire('../lib/dynamodb', {'aws-sdk': {DynamoDB: {DocumentClient: docClient}}});
-
-            docClient.prototype.get = function(params, callback) {
-                expect(params).to.deep.equal({
-                    "TableName": "tenants",
-                    "Key": {
-                        "clientKey": "12345678-1234-1234-1234-0123456789AB",
-                        "key": "clientInfo"
-                    }
-                });
-                callback(null, {"key":"12345678-1234-1234-1234-0123456789AB:clientInfo", "val": value});
-            };
-
-            var logger = {};
-            var options = {"table": "tenants"};
-
-            var adapter = dynamodb(logger, options);
-
+        it('get entry', async function() {
             var result = await adapter.get(key, clientKey);
-            expect(result).to.equal(value);
+            expect(result).to.deep.equal(value);
         }).timeout(10000);
 
-        it('missing property', async function() {
-            var clientKey = "12345678-1234-1234-1234-0123456789AB";
-            var key = "clientInfo";
+        it('delete entry', async function() {
+            await adapter.del(key, clientKey);
+        }).timeout(10000);
 
-            var docClient = function() {};
-            var dynamodb = proxyquire('../lib/dynamodb', {'aws-sdk': {DynamoDB: {DocumentClient: docClient}}});
-
-            docClient.prototype.get = function(params, callback) {
-                expect(params).to.deep.equal({
-                    "TableName": "tenants",
-                    "Key": {
-                        "clientKey": "12345678-1234-1234-1234-0123456789AB",
-                        "key": "clientInfo"
-                    }
-                });
-                callback(null, {});
-            };
-
-            var logger = {};
-            var options = {"table": "tenants"};
-
-            var adapter = dynamodb(logger, options);
-
+        it('check entry is gone', async function() {
             var result = await adapter.get(key, clientKey);
             expect(result).to.equal(null);
         }).timeout(10000);
     });
 
-    describe('del()', function() {
-        it('with clientKey and key', async function() {
-            var clientKey = "12345678-1234-1234-1234-0123456789AB";
-            var key = "clientInfo";
+    describe('delete mutiple entries', function () {
+        var clientKey = uuidv4();
+        const keyA = "keyA";
+        const keyB = "keyB";
+        const valueA = {test: 123};
+        const valueB = {test: 456};
 
-            var docClient = function() {};
-            var dynamodb = proxyquire('../lib/dynamodb', {'aws-sdk': {DynamoDB: {DocumentClient: docClient}}});
-
-            var deleteCalled = false;
-            docClient.prototype.delete = function(params) {
-                expect(params).to.deep.equal({
-                    "TableName": "tenants",
-                    "Key": {
-                        "clientKey": "12345678-1234-1234-1234-0123456789AB",
-                        "key": "clientInfo"
-                    }
-                });
-
-                return {
-                    promise: function () {
-                        return new RSVP.Promise(function (resolve, reject) {
-                            deleteCalled = true;
-                            resolve();
-                        });
-                    }
-                }
-            };
-
-            var logger = {};
-            var options = {"table": "tenants"};
-
-            var adapter = dynamodb(logger, options);
-
-            await adapter.del(key, clientKey);
-            expect(deleteCalled).to.equal(true);
+        it('create entries', async function() {
+            var result = await adapter.set(keyA, valueA, clientKey);
+            expect(result).to.equal(valueA);
+            var result = await adapter.set(keyB, valueB, clientKey);
+            expect(result).to.equal(valueB);
         }).timeout(10000);
 
-        it('with clientKey', async function() {
-            var clientKey = "12345678-1234-1234-1234-0123456789AB";
-
-            var docClient = function() {};
-            var dynamodb = proxyquire('../lib/dynamodb', {'aws-sdk': {DynamoDB: {DocumentClient: docClient}}});
-            var items = [{key: "A"}, {key: "B"}];
-
-            docClient.prototype.query = function(params) {
-                expect(params).to.deep.equal({
-                    TableName: "tenants",
-                    KeyConditionExpression: "clientKey = :clientKey",
-                    ExpressionAttributeValues: {
-                        ":clientKey": clientKey
-                    }
-                });
-
-                return {
-                    promise: function () {
-                        return new RSVP.Promise(function (resolve, reject) {
-                            resolve({Items: items});
-                        });
-                    }
-                }
-            };
-
-            var deleteCounter = 0;
-            docClient.prototype.delete = function(params) {
-                expect(params).to.deep.equal({
-                    "TableName": "tenants",
-                    "Key": {
-                        "clientKey": clientKey,
-                        "key": items[deleteCounter].key
-                    }
-                });
-
-                return {
-                    promise: function () {
-                        return new RSVP.Promise(function (resolve, reject) {
-                            deleteCounter++;
-                            resolve();
-                        });
-                    }
-                }
-            };
-
-            var logger = {};
-            var options = {"table": "tenants"};
-
-            var adapter = dynamodb(logger, options);
-
+        it('delete entries', async function() {
             await adapter.del(clientKey);
-            expect(deleteCounter).to.equal(2);
+        }).timeout(10000);
+
+        it('check entries are gone', async function() {
+            var result = await adapter.get(keyA, clientKey);
+            expect(result).to.equal(null);
+
+            var result = await adapter.get(keyB, clientKey);
+            expect(result).to.equal(null);
         }).timeout(10000);
     });
+
+    after(async function () {
+        // Make sure sample data from before is untouched
+        var docClient = new AWS.DynamoDB.DocumentClient();
+
+        var result = await docClient.get({
+          "TableName": tenant_table,
+          "Key": {
+            "key": "clientInfo",
+            "clientKey": "40b74094-18e8-417a-85bc-0b2c66eedad5",
+          }
+        }).promise();
+        expect(result.Item.val).to.deep.equal({"abc": 123});
+
+        var result = await docClient.get({
+          "TableName": tenant_table,
+          "Key": {
+            "key": "clientInfo",
+            "clientKey": "2921425a-abae-4969-82a5-7d03ce09a624",
+          }
+        }).promise();
+        expect(result.Item.val).to.deep.equal({"def": 456});
+    })
 });

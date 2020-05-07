@@ -1,0 +1,51 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Resources to run the integration test for atlassian-connect-express-dynamodb'
+
+Resources:
+
+  TestUser:
+    Type: AWS::IAM::User
+    Properties: 
+      UserName: atlassian-connect-express-dynamodb-test-user
+      Policies:
+        - PolicyName: "access-tenant-table"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - dynamodb:BatchGetItem
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt TenantTable.Arn
+
+  TenantTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: atlassian-connect-express-dynamodb-test-tenant-table
+      KeySchema:
+        - AttributeName: clientKey
+          KeyType: HASH
+        - AttributeName: key
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: clientKey
+          AttributeType: S
+        - AttributeName: key
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      SSESpecification:
+        SSEEnabled: true
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+
+  
