@@ -43,7 +43,7 @@ describe('DynamodbAdapter', function() {
 
             var result = await adapter.set(key, value, clientKey);
             expect(result).to.equal(value);
-        });
+        }).timeout(10000);
     });
 
     describe('get()', function() {
@@ -84,7 +84,7 @@ describe('DynamodbAdapter', function() {
 
             var result = await adapter.get(key, clientKey);
             expect(result).to.equal(value);
-        });
+        }).timeout(10000);
 
         it('missing property', async function() {
             var clientKey = "12345678-1234-1234-1234-0123456789AB";
@@ -111,7 +111,7 @@ describe('DynamodbAdapter', function() {
 
             var result = await adapter.get(key, clientKey);
             expect(result).to.equal(null);
-        });
+        }).timeout(10000);
     });
 
     describe('del()', function() {
@@ -149,7 +149,7 @@ describe('DynamodbAdapter', function() {
 
             await adapter.del(key, clientKey);
             expect(deleteCalled).to.equal(true);
-        });
+        }).timeout(10000);
 
         it('with clientKey', async function() {
             var clientKey = "12345678-1234-1234-1234-0123456789AB";
@@ -203,6 +203,6 @@ describe('DynamodbAdapter', function() {
 
             await adapter.del(clientKey);
             expect(deleteCounter).to.equal(2);
-        });
+        }).timeout(10000);
     });
 });
