@@ -1,6 +1,6 @@
 {
   "name": "atlassian-connect-express-dynamodb",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Dynamodb bindings for atlassian-connect-express",
   "main": "index.js",
   "directories": {
