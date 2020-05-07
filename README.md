@@ -12,27 +12,27 @@ To use this library in your atlassian cloud application:
 1. Create a new DynamoDB table to store information about tenants
 
     ```
-TenantTable:
-  Type: AWS::DynamoDB::Table
-  Properties:
-    TableName: TENANT_TABLE
-    KeySchema:
-      - AttributeName: clientKey
-        KeyType: HASH
-      - AttributeName: key
-        KeyType: RANGE
-    AttributeDefinitions:
-      - AttributeName: clientKey
-        AttributeType: S
-      - AttributeName: key
-        AttributeType: S
-    ProvisionedThroughput:
-      ReadCapacityUnits: 5
-      WriteCapacityUnits: 5
-    SSESpecification:
-      SSEEnabled: true
-    StreamSpecification:
-      StreamViewType: NEW_IMAGE
+    TenantTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TENANT_TABLE
+        KeySchema:
+          - AttributeName: clientKey
+            KeyType: HASH
+          - AttributeName: key
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: clientKey
+            AttributeType: S
+          - AttributeName: key
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        SSESpecification:
+          SSEEnabled: true
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
     ```
 
 2. Install this library
