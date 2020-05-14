@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/gellweiler/atlassian-connect-express-dynamodb#readme",
   "dependencies": {
-    "atlassian-connect-express": "^3.5.2",
     "aws-sdk": "^2.671.0",
     "lodash": "^4.17.15",
     "rsvp": "^4.8.5"

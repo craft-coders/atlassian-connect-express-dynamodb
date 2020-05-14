@@ -39,11 +39,12 @@ To use this library in your atlassian cloud application:
 
     `npm install --save atlassian-connect-express-dynamodb`
 
-3. Add this library as requirement to `app.js`
+3. Add this library as requirement to `app.js` and register the adapter
 
     ```
     var ac = require('atlassian-connect-express'); // insert after this line
-    require('atlassian-connect-express-dynamodb');
+    var adapter = require('atlassian-connect-express-dynamodb');
+    ac.store.register("dynamodb", adapter);
     ```
 
 4. Modify `config.json` to use the dynamodb adapter
