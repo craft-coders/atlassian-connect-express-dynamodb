@@ -26,9 +26,7 @@ To use this library in your atlassian cloud application:
             AttributeType: S
           - AttributeName: key
             AttributeType: S
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+        BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
     ```
