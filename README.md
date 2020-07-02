@@ -31,8 +31,6 @@ To use this library in your atlassian cloud application:
           WriteCapacityUnits: 5
         SSESpecification:
           SSEEnabled: true
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
     ```
 
 2. Install this library
