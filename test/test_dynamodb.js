@@ -3,8 +3,17 @@ const { v4: uuidv4 } = require('uuid');
 const dynamodb = require('../lib/dynamodb');
 const AWS = require("aws-sdk");
 
+const { DynamoDBDocument } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDB } = require("@aws-sdk/client-dynamodb");
+
 const tenant_table = "atlassian-connect-express-dynamodb-test-tenant-table";
 
+// JS SDK v3 does not support global configuration.
+// Codemod has attempted to pass values to each service client in this file.
+// You may need to update clients outside of this file, if they use global config.
+// JS SDK v3 does not support global configuration.
+// Codemod has attempted to pass values to each service client in this file.
+// You may need to update clients outside of this file, if they use global config.
 AWS.config.update({region: 'eu-west-1'});
 
 describe('Integration Test', function() {
@@ -12,7 +21,7 @@ describe('Integration Test', function() {
 
     before(async function() {
         // Create sample data
-        var docClient = new AWS.DynamoDB.DocumentClient();
+        var docClient = DynamoDBDocument.from(new DynamoDB());
 
         await docClient.put({
           "TableName": tenant_table,
@@ -21,7 +30,7 @@ describe('Integration Test', function() {
             "clientKey": "40b74094-18e8-417a-85bc-0b2c66eedad5",
             "val": {"abc":123}
           }
-        }).promise()
+        })
 
         await docClient.put({
           "TableName": tenant_table,
@@ -30,7 +39,7 @@ describe('Integration Test', function() {
             "clientKey": "2921425a-abae-4969-82a5-7d03ce09a624",
             "val": {"def":456}
           }
-        }).promise()
+        })
 
         var logger = {};
         var options = {"table": tenant_table};
@@ -104,7 +113,7 @@ describe('Integration Test', function() {
 
     after(async function () {
         // Make sure sample data from before is untouched
-        var docClient = new AWS.DynamoDB.DocumentClient();
+        var docClient = DynamoDBDocument.from(new DynamoDB());
 
         var result = await docClient.get({
           "TableName": tenant_table,
@@ -112,7 +121,7 @@ describe('Integration Test', function() {
             "key": "clientInfo",
             "clientKey": "40b74094-18e8-417a-85bc-0b2c66eedad5",
           }
-        }).promise();
+        });
         expect(result.Item.val).to.deep.equal({"abc": 123});
 
         var result = await docClient.get({
@@ -121,7 +130,7 @@ describe('Integration Test', function() {
             "key": "clientInfo",
             "clientKey": "2921425a-abae-4969-82a5-7d03ce09a624",
           }
-        }).promise();
+        });
         expect(result.Item.val).to.deep.equal({"def": 456});
     })
 });
