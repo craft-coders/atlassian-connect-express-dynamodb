@@ -22,6 +22,7 @@
   "homepage": "https://github.com/gellweiler/atlassian-connect-express-dynamodb#readme",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.616.0",
+    "@aws-sdk/lib-dynamodb": "^3.616.0",
     "lodash": "^4.17.15",
     "rsvp": "^4.8.5"
   },
