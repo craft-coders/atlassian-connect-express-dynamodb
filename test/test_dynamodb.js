@@ -1,7 +1,4 @@
 const expect = require('chai').expect;
-const sinon = require('sinon');
-const proxyquire =  require('proxyquire');
-const RSVP = require('rsvp');
 const { v4: uuidv4 } = require('uuid');
 const dynamodb = require('../lib/dynamodb');
 const AWS = require("aws-sdk");
