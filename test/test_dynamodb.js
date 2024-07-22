@@ -1,20 +1,11 @@
 const expect = require('chai').expect;
 const { v4: uuidv4 } = require('uuid');
 const dynamodb = require('../lib/dynamodb');
-const AWS = require("aws-sdk");
 
 const { DynamoDBDocument } = require("@aws-sdk/lib-dynamodb");
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 
 const tenant_table = "atlassian-connect-express-dynamodb-test-tenant-table";
-
-// JS SDK v3 does not support global configuration.
-// Codemod has attempted to pass values to each service client in this file.
-// You may need to update clients outside of this file, if they use global config.
-// JS SDK v3 does not support global configuration.
-// Codemod has attempted to pass values to each service client in this file.
-// You may need to update clients outside of this file, if they use global config.
-AWS.config.update({region: 'eu-west-1'});
 
 describe('Integration Test', function() {
     var adapter;
